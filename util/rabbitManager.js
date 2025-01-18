@@ -1,5 +1,5 @@
 import getQueueChannel from "../config/queue.js";
-
+import getGroqChatCompletion from "../config/groq.js";
 const processedExchange = 'processedExchange'
 const rawExchange = 'rawExchange'
 
@@ -59,12 +59,14 @@ export async function consumeFromRawExceptionQueue() {
             throw Error("Channel not initialized")
         }
 
-        channel.consume(dbQueue.queue,async(message)=>{
+        channel.consume(rawExceptionQueue.queue,async(message)=>{
             if(message.content){
 
-                const data = JSON.parse(message.content)
+                let data = JSON.parse(message.content)
 
-                console.log(data)
+                data.llmResponse = await getGroqChatCompletion("just provide me the idea to solve the problem dont give any code just give a possible way to solve and describe the probable cause of problem , also give answer without new line \n"+data.exception.stack)
+                await publishToProcessed(data)
+                channel.ack(message)
 
             }
         },{noAck:false})
