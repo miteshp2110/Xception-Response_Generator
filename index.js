@@ -8,8 +8,7 @@ import {initExchanges,consumeFromRawExceptionQueue} from "./util/rabbitManager.j
 dotenv.config();
 
 
-getQueueChannel().then(async ()=>{
-    await initExchanges()
+initExchanges().then(async ()=>{
     await consumeFromRawExceptionQueue()
 }).catch((err)=>{
     console.log("Error reading queue channel")
